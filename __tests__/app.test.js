@@ -4,12 +4,10 @@ const app = require("../app");
 const db = require("../db/connection");
 const data = require("../db/data/test-data");
 const seed = require("../db/seeds/seed");
-const { response } = require("express")
 
 /* Set up your test imports here */
 
 afterAll(() => {
-  console.log("all tests have run")
   return db.end();
 });
 
@@ -29,3 +27,18 @@ describe("GET /api", () => {
       });
   });
 });
+
+describe("GET /api/topics", () => {
+  test("200: Responds with an array of topics", () => {
+    return request(app)
+    .get("/api/topics")
+    .expect(200)
+    .then((response) => {
+      expect(response.body.topics.length).toBe(3);
+      response.body.topics.forEach((topic) => {
+        expect(typeof topic.description).toBe("string");
+        expect(typeof topic.slug).toBe("string");
+      });
+    })
+  })
+})
