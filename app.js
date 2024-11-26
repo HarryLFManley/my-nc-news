@@ -1,6 +1,6 @@
 const express = require("express");
 const app = express();
-const { getApi, getTopics, getArticleById } = require("./api-controller");
+const { getApi, getTopics, getArticleById, getArticle } = require("./api-controller");
 const { customErrorHandler, serverErrorhandler } = require("./errors");
 
 app.use(express.json());
@@ -11,8 +11,10 @@ app.get("/api/topics", getTopics);
 
 app.get("/api/articles/:article_id", getArticleById);
 
+app.get("/api/articles", getArticle)
+
 app.all("*", (req, res) => {
-  res.status(404).send({ msg: "Not found" });
+  res.status(400).send({ msg: "Bad request" });
 });
 
 app.use(customErrorHandler);

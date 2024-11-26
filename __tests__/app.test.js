@@ -69,3 +69,31 @@ describe("GET /api/articles/:article_id", () => {
     })
   })
 })
+
+describe("GET /api/articles", () => {
+  test("200: Responds with an array of articles to the client", () => {
+    return request(app)
+    .get("/api/articles")
+    .expect(200)
+    .then((response) => {
+      response.body.articles.forEach((article) => {
+        expect(typeof article.article_id).toBe('number');
+        expect(typeof article.author).toBe('string');
+        expect(typeof article.title).toBe('string');
+        expect(typeof article.topic).toBe('string');
+        expect(typeof article.created_at).toBe('string');
+        expect(typeof article.votes).toBe('number');
+        expect(typeof article.article_img_url).toBe('string');
+        expect(typeof article.comment_count).toBe("string");
+      });
+    })
+  })
+  test("400: Responds with an error message if the table is invalid", () => {
+    return request(app)
+    .get("/api/artiowaN")
+    .expect(400)
+    .then(({ body }) => {
+      expect(body.msg).toBe("Bad request")
+    })
+  })
+})
