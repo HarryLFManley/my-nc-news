@@ -76,6 +76,7 @@ describe("GET /api/articles", () => {
       .get("/api/articles")
       .expect(200)
       .then((response) => {
+        expect(response.body.articles.length).toBe(13);
         response.body.articles.forEach((article) => {
           expect(typeof article.article_id).toBe("number");
           expect(typeof article.author).toBe("string");
@@ -131,3 +132,4 @@ describe("GET /api/articles/:article_id/comments", () => {
       });
   });
 });
+
