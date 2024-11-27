@@ -1,4 +1,4 @@
-const request = require("supertest")
+const request = require("supertest");
 const endpointsJson = require("../endpoints.json");
 const app = require("../app");
 const db = require("../db/connection");
@@ -32,68 +32,102 @@ describe("GET /api", () => {
 describe("GET /api/topics", () => {
   test("200: Responds with an array of topics", () => {
     return request(app)
-    .get("/api/topics")
-    .expect(200)
-    .then((response) => {
-      expect(response.body.topics.length).toBe(3);
-      response.body.topics.forEach((topic) => {
-        expect(typeof topic.description).toBe("string");
-        expect(typeof topic.slug).toBe("string");
+      .get("/api/topics")
+      .expect(200)
+      .then((response) => {
+        expect(response.body.topics.length).toBe(3);
+        response.body.topics.forEach((topic) => {
+          expect(typeof topic.description).toBe("string");
+          expect(typeof topic.slug).toBe("string");
+        });
       });
-    })
-  })
-})
+  });
+});
 
 describe("GET /api/articles/:article_id", () => {
   test("200: Responds with a single article object to the client", () => {
     return request(app)
-    .get("/api/articles/1")
-    .expect(200)
-    .then((response) => {
-      expect(typeof response.body.article.article_id).toBe('number');
-      expect(typeof response.body.article.author).toBe('string');
-      expect(typeof response.body.article.title).toBe('string');
-      expect(typeof response.body.article.body).toBe('string');
-      expect(typeof response.body.article.topic).toBe('string');
-      expect(typeof response.body.article.created_at).toBe('string');
-      expect(typeof response.body.article.votes).toBe('number');
-      expect(typeof response.body.article.article_img_url).toBe('string');
-    })
-  })
+      .get("/api/articles/1")
+      .expect(200)
+      .then((response) => {
+        expect(typeof response.body.article.article_id).toBe("number");
+        expect(typeof response.body.article.author).toBe("string");
+        expect(typeof response.body.article.title).toBe("string");
+        expect(typeof response.body.article.body).toBe("string");
+        expect(typeof response.body.article.topic).toBe("string");
+        expect(typeof response.body.article.created_at).toBe("string");
+        expect(typeof response.body.article.votes).toBe("number");
+        expect(typeof response.body.article.article_img_url).toBe("string");
+      });
+  });
   test("404: Responds with error message if the id is invalid", () => {
     return request(app)
-    .get("/api/articles/99987")
-    .expect(404)
-    .then(({ body }) => {
-      expect(body.msg).toBe("Not found")
-    })
-  })
-})
+      .get("/api/articles/99987")
+      .expect(404)
+      .then(({ body }) => {
+        expect(body.msg).toBe("Not found");
+      });
+  });
+});
 
 describe("GET /api/articles", () => {
   test("200: Responds with an array of articles to the client", () => {
     return request(app)
-    .get("/api/articles")
-    .expect(200)
-    .then((response) => {
-      response.body.articles.forEach((article) => {
-        expect(typeof article.article_id).toBe('number');
-        expect(typeof article.author).toBe('string');
-        expect(typeof article.title).toBe('string');
-        expect(typeof article.topic).toBe('string');
-        expect(typeof article.created_at).toBe('string');
-        expect(typeof article.votes).toBe('number');
-        expect(typeof article.article_img_url).toBe('string');
-        expect(typeof article.comment_count).toBe("string");
+      .get("/api/articles")
+      .expect(200)
+      .then((response) => {
+        response.body.articles.forEach((article) => {
+          expect(typeof article.article_id).toBe("number");
+          expect(typeof article.author).toBe("string");
+          expect(typeof article.title).toBe("string");
+          expect(typeof article.topic).toBe("string");
+          expect(typeof article.created_at).toBe("string");
+          expect(typeof article.votes).toBe("number");
+          expect(typeof article.article_img_url).toBe("string");
+          expect(typeof article.comment_count).toBe("string");
+        });
       });
-    })
-  })
+  });
   test("400: Responds with an error message if the table is invalid", () => {
     return request(app)
-    .get("/api/artiowaN")
-    .expect(400)
-    .then(({ body }) => {
-      expect(body.msg).toBe("Bad request")
-    })
-  })
-})
+      .get("/api/artiowaN")
+      .expect(400)
+      .then(({ body }) => {
+        expect(body.msg).toBe("Bad request");
+      });
+  });
+});
+
+describe("GET /api/articles/:article_id/comments", () => {
+  test("200: Responds with an array of comments for the given article_id", () => {
+    return request(app)
+      .get("/api/articles/1/comments")
+      .expect(200)
+      .then(({ body }) => {
+        body.comments.forEach((comment) => {
+          expect(typeof comment.comment_id).toBe("number");
+          expect(typeof comment.votes).toBe("number");
+          expect(typeof comment.created_at).toBe("string");
+          expect(typeof comment.author).toBe("string");
+          expect(typeof comment.body).toBe("string");
+          expect(typeof comment.article_id).toBe("number");
+        });
+      });
+  });
+  test("404: Responds with an error message if the Id is invalid", () => {
+    return request(app)
+      .get("/api/articles/9234/comments")
+      .expect(404)
+      .then(({ body }) => {
+        expect(body.msg).toBe("Not found");
+      });
+  });
+  test("400: Responds with an error message if the comments is invalid", () => {
+    return request(app)
+      .get("/api/articles/1/commmmmmments")
+      .expect(400)
+      .then(({ body }) => {
+        expect(body.msg).toBe("Bad request");
+      });
+  });
+});
