@@ -5,6 +5,7 @@ const db = require("../db/connection");
 const data = require("../db/data/test-data");
 const seed = require("../db/seeds/seed");
 const { response } = require("express");
+const { string } = require("pg-format");
 
 /* Set up your test imports here */
 
@@ -125,6 +126,58 @@ describe("GET /api/articles/:article_id/comments", () => {
   test("400: Responds with an error message if the comments is invalid", () => {
     return request(app)
       .get("/api/articles/1/commmmmmments")
+      .expect(400)
+      .then(({ body }) => {
+        expect(body.msg).toBe("Bad request");
+      });
+  });
+});
+
+describe("POST /api/articles/:article_id/comments", () => {
+  test("201: successfully add a new comment", () => {
+    const newComment = {
+      username: "butter_bridge",
+      body: "This is very funny.",
+    };
+
+    return request(app)
+      .post("/api/articles/3/comments")
+      .send(newComment)
+      .expect(201)
+      .then(({ body: { comment } }) => {
+        expect(comment).toEqual(
+          expect.objectContaining({
+            comment_id: expect.any(Number),
+            author: "butter_bridge",
+            body: "This is very funny.",
+            article_id: 3,
+          })
+        );
+      });
+  });
+  test("400: Responds with an error message if the article_id is invalid", () => {
+    const newComment = {
+      username: "butter_bridge",
+      body: "This is very funny.",
+    };
+
+    return request(app)
+      .post("/api/articles/97245/comments")
+      .send(newComment)
+      .expect(400)
+      .then(({ body }) => {
+        expect(body.msg).toBe("Bad request");
+      });
+  });
+  test("400: Responds with an error message if the username does not already exist", () => {
+    const newComment = {
+      username: "oihadfion",
+      body: "This is very funny.",
+    };
+
+    return request(app)
+      .post("/api/articles/3/comments")
+      .send(newComment)
       .expect(400)
       .then(({ body }) => {
         expect(body.msg).toBe("Bad request");
