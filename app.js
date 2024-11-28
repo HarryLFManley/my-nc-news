@@ -1,6 +1,6 @@
 const express = require("express");
 const app = express();
-const { getApi, getTopics, getArticleById, getArticle, getCommentsById } = require("./api-controller");
+const { getApi, getTopics, getArticleById, getArticle, getCommentsById, postComments } = require("./api-controller");
 const { customErrorHandler, serverErrorhandler } = require("./errors");
 
 app.use(express.json());
@@ -14,6 +14,8 @@ app.get("/api/articles/:article_id", getArticleById);
 app.get("/api/articles", getArticle);
 
 app.get("/api/articles/:article_id/comments", getCommentsById);
+
+app.post("/api/articles/:article_id/comments", postComments);
 
 app.all("*", (req, res) => {
   res.status(400).send({ msg: "Bad request" });
