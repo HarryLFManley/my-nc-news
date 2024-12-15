@@ -1,4 +1,4 @@
-const { user } = require("pg/lib/defaults");
+const { user, rows } = require("pg/lib/defaults");
 const db = require("./db/connection");
 
 exports.fetchTopics = () => {
@@ -47,22 +47,45 @@ exports.checkUsernameExists = (username) => {
     .then((result) => result.rows.length > 0);
 };
 
+exports.checkArticleExists = (article_id) => {
+  return db
+    .query(`SELECT * FROM articles WHERE article_id = $1`, [article_id])
+    .then((result) => result.rows.length > 0);
+};
+
 exports.addComment = (comment) => {
   const { article_id, username, body } = comment;
 
-  if (comment.article_id > 13) {
-    return Promise.reject({ status: 400, msg: "Bad request" });
-  }
+  return this.checkArticleExists(article_id)
+    .then((articleExists) => {
+      if (!articleExists) {
+        return Promise.reject({ status: 400, msg: "Bad request" });
+      }
 
-  return this.checkUsernameExists(username).then((usernameExists) => {
-    if (!usernameExists) {
-      return Promise.reject({ status: 400, msg: "Bad request" });
-    }
-
-    const sqlQuery = `INSERT INTO comments(article_id, author, body, votes, created_at) VALUES ($1, $2, $3, 0, NOW()) RETURNING *;`;
-
-    return db.query(sqlQuery, [article_id, username, body]).then(({ rows }) => {
+      return this.checkUsernameExists(username);
+    })
+    .then((usernameExists) => {
+      if (!usernameExists) {
+        return Promise.reject({ status: 400, msg: "Bad request" });
+      }
+      const sqlQuery = `INSERT INTO comments(article_id, author, body) VALUES ($1, $2, $3) RETURNING *;`;
+      return db.query(sqlQuery, [article_id, username, body]);
+    })
+    .then(({ rows }) => {
       return rows[0];
     });
+};
+
+exports.PatchArticleById = (inc_votes, article_id) => {
+  const sqlQuery =
+    "UPDATE articles SET votes = votes + $2 WHERE article_id = $1 RETURNING *;";
+  return db.query(sqlQuery, [inc_votes, article_id]).then(({ rows }) => {
+    return rows[0];
   });
+};
+
+exports.DeleteCommentById = (comment_id) => {
+  const sqlQuery = "DELETE FROM comments WHERE comment_id = $1 RETURNING *;";
+
+  return db.query(sqlQuery, [comment_id]);
 };
